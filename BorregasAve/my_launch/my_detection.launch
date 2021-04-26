@@ -7,11 +7,31 @@
   <arg name="is_register_lidar2camera_tf" default="true" />
   <arg name="is_publish_projection_matrix" default="true" />
   <arg name="is_publish_camera_info" default="true" />
+
   <arg name="camera_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_lidar_sim_sf.yaml"/>
+  <arg name="camera_left_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_left_lidar_sim_sf.yaml"/>
+  <arg name="camera_right_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_right_lidar_sim_sf.yaml"/>
 
   <!-- calibration_publisher -->
   <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+    <arg name="camera_id" value="/camera0" />
     <arg name="file" value="$(arg camera_calib)" />
+    <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
+    <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
+    <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
+  </include>
+
+  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+    <arg name="camera_id" value="/camera1" />
+    <arg name="file" value="$(arg camera_left_calib)" />
+    <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
+    <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
+    <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
+  </include>
+
+  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+    <arg name="camera_id" value="/camera2" />
+    <arg name="file" value="$(arg camera_right_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
@@ -20,18 +40,54 @@
   <!-- points2image -->
   <node pkg="points2image" type="points2image" name="points2image" />
 
-  <!-- ssd -->
+  <!-- darknet -->
+  <include file="$(find vision_darknet_detect)/launch/vision_darknet_detect.launch">
+    <arg name="use_gpu" value="$(arg is_use_gpu)" />
+    <arg name="score_threshold" value="0.8" />
+    <arg name="network_definition_file" value="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.cfg" />
+    <arg name="pretrained_model_file" value="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.weights" />
+    <arg name="camera_id" value="/camera0" />
+    <arg name="image_src" value="/image_raw" />
+  </include>
+
   <include file="$(find vision_ssd_detect)/launch/vision_ssd_detect.launch">
     <arg name="use_gpu" value="$(arg is_use_gpu)" />
     <arg name="score_threshold" default="0.8" />
-    <arg name="network_definition_file" default="$(env HOME)/ssdcaffe/models/VGGNet/VOC0712Plus/SSD_512x512_ft/deploy.prototxt" />
-    <arg name="pretrained_model_file" default="$(env HOME)/ssdcaffe/models/VGGNet/VOC0712Plus/SSD_512x512_ft/VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel" />
+    <arg name="network_definition_file" default="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.cfg" />
+    <arg name="pretrained_model_file" default="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.weights" />
+    <arg name="camera_id" value="/camera1" />
+    <arg name="image_src" value="/image_raw" />
+  </include>
+
+  <include file="$(find vision_ssd_detect)/launch/vision_ssd_detect.launch">
+    <arg name="use_gpu" value="$(arg is_use_gpu)" />
+    <arg name="score_threshold" default="0.8" />
+    <arg name="network_definition_file" default="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.cfg" />
+    <arg name="pretrained_model_file" default="$(env HOME)/shared_dir/autoware-perception/yolov3/yolov3.weights" />
+    <arg name="camera_id" value="/camera1" />
+    <arg name="image_src" value="/image_raw" />
   </include>
 
   <!-- range_fusion -->
   <include file="$(find range_fusion)/launch/range_fusion.launch">
     <arg name="car" value="$(arg car_detection)" />
     <arg name="pedestrian" value="$(arg pedestrian_detection)" />
+    <arg name="detected_objects_vision" value="/detection/image_detector/camera0/objects" \>
+    <arg name="camera_info_src" value="/camera0/camera_info" \>
+  </include>
+
+  <include file="$(find range_fusion)/launch/range_fusion.launch">
+    <arg name="car" value="$(arg car_detection)" />
+    <arg name="pedestrian" value="$(arg pedestrian_detection)" />
+    <arg name="detected_objects_vision" value="/detection/image_detector/camera1/objects" \>
+    <arg name="camera_info_src" value="/camera1/camera_info" \>
+  </include>
+
+  <include file="$(find range_fusion)/launch/range_fusion.launch">
+    <arg name="car" value="$(arg car_detection)" />
+    <arg name="pedestrian" value="$(arg pedestrian_detection)" />
+    <arg name="detected_objects_vision" value="/detection/image_detector/camera2/objects" \>
+    <arg name="camera_info_src" value="/camera2/camera_info" \>
   </include>
 
   <!-- dummy_track -->
