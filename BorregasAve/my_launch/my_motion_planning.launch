@@ -1,4 +1,6 @@
 <launch>
+  <!-- costmap generation -->
+  <include file="$(find costmap_generator)/launch/costmap_generator.launch"/>
 
   <!-- Vehicle Contorl -->
   <include file="$(find runtime_manager)/launch_files/vehicle_socket.launch"/>
