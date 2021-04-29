@@ -7,14 +7,15 @@
   <arg name="is_publish_projection_matrix" default="true" />
   <arg name="is_publish_camera_info" default="true" />
 
-  <arg name="camera_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_lidar_sim_sf.yaml"/>
+  <arg name="camera_main_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_lidar_sim_sf.yaml"/>
   <arg name="camera_left_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_left_lidar_sim_sf.yaml"/>
   <arg name="camera_right_calib" default="$(env HOME)/shared_dir/autoware-data/BorregasAve/data/calibration/camera_lidar_3d/prius/camera_right_lidar_sim_sf.yaml"/>
 
   <!-- calibration_publisher -->
   <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="camera_id" value="/camera0" />
-    <arg name="file" value="$(arg camera_calib)" />
+    <arg name="camera_frame" value="camera_main" />
+    <arg name="file" value="$(arg camera_main_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
@@ -22,6 +23,7 @@
 
   <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="camera_id" value="/camera1" />
+    <arg name="camera_frame" value="camera_left" />
     <arg name="file" value="$(arg camera_left_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
@@ -30,6 +32,7 @@
 
   <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="camera_id" value="/camera2" />
+    <arg name="camera_frame" value="camera_right" />
     <arg name="file" value="$(arg camera_right_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
@@ -91,7 +94,9 @@
 
   <!-- traffic light recognition -->
   <!-- feat_proj -->
-  <include file="$(find trafficlight_recognizer)/launch/feat_proj.launch" />
+  <include file="$(find trafficlight_recognizer)/launch/feat_proj.launch">
+    <arg name="camera_id" value="/camera0" />
+  </include>
 
   <!-- region_tlr -->
   <include file="$(find trafficlight_recognizer)/launch/traffic_light_recognition.launch">
