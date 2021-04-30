@@ -73,19 +73,24 @@
   <node pkg="range_vision_fusion" name="range_vision_fusion_main" type="range_vision_fusion" output="screen">
     <param name="detected_objects_vision" value="/detection/image_detector/camera0/objects" />
     <param name="camera_info_src" value="/camera0/camera_info" />
+    <param name="fused_objects" value="/detection/fusion_tools/camera0/objects" />
   </node>
 
   <node pkg="range_vision_fusion" name="range_vision_fusion_left" type="range_vision_fusion" output="screen">
     <param name="detected_objects_vision" value="/detection/image_detector/camera1/objects" />
     <param name="camera_info_src" value="/camera1/camera_info" />
+    <param name="fused_objects" value="/detection/fusion_tools/camera1/objects" />
   </node>
 
   <node pkg="range_vision_fusion" name="range_vision_fusion_right" type="range_vision_fusion" output="screen">
     <param name="detected_objects_vision" value="/detection/image_detector/camera2/objects" />
     <param name="camera_info_src" value="/camera2/camera_info" />
+    <param name="fused_objects" value="/detection/fusion_tools/camera2/objects" />
   </node>
 
-  <node pkg="range_vision_fusion" type="fusion_assembler" name="fusion_assembler" args="/detection/fusion_tools/camera0/objects /detection/fusion_tools/camera1/objects /detection/fusion_tools/camera2/objects"/>
+  <node pkg="range_vision_fusion" type="fusion_assembler" name="fusion_assembler">
+    <rosparam param="object_array_srcs"> ["/detection/fusion_tools/camera0/objects", "/detection/fusion_tools/camera1/objects", "/detection/fusion_tools/camera2/objects"] </rosparam>
+  </node>
 
   <!-- euclidean_cluster -->
   <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
